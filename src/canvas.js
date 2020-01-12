@@ -1,6 +1,12 @@
 let canvas;
+let fps;
+let stop;
 
 export const getDim = () => ({w: canvas.width, h: canvas.height});
+
+export const setCustomFrameRate = f => fps = f;
+
+export const cancelAnimation = () => stop = true;
 
 export const init = drawFn => {
   canvas = document.createElement('canvas');
@@ -20,12 +26,22 @@ export const init = drawFn => {
     ctx.fillRect(0, 0, getDim().w, getDim().h);
   };
 
+  let fpsInterval = 1000 / fps;
+  let time = Date.now();
+  let elapsed;
+
   const draw = () => {
+    if(stop) return;
     requestAnimationFrame(draw);
 
-    refresh();
+    elapsed = Date.now() - time;
 
-    drawFn(ctx);
+    if (elapsed > fpsInterval || typeof fps === 'undefined' || fps >= 60) {
+      time = Date.now() - (elapsed % fpsInterval);
+
+      refresh();
+      drawFn(ctx);
+    }
   };
 
   draw();
